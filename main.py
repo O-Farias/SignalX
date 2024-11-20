@@ -11,8 +11,8 @@ def main():
     print("🔍 Configurando análise...")
 
     # Ativo e intervalo configuráveis
-    symbol = "MSFT"  
-    interval = "5min"  
+    symbol = "AAPL"  
+    interval = "5m"  
 
     print(f"🔍 Buscando dados para {symbol} com intervalo de {interval}...")
     data = fetch_market_data(symbol=symbol, interval=interval)
