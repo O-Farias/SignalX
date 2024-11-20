@@ -10,9 +10,9 @@ def main():
     print("🚀 Bem-vindo ao SignalX!")
     print("🔍 Configurando análise...")
 
-    # Ativo e intervalo configuráveis
-    symbol = "AAPL"  
-    interval = "5m"  
+    # Configurando para BTC
+    symbol = "BTC-USD"  # Alterado para Bitcoin em relação ao dólar
+    interval = "15m"  # Intervalo sugerido para testes (compatível com Yahoo Finance)
 
     print(f"🔍 Buscando dados para {symbol} com intervalo de {interval}...")
     data = fetch_market_data(symbol=symbol, interval=interval)

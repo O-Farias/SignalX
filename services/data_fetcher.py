@@ -19,11 +19,20 @@ def fetch_market_data(symbol="AAPL", interval="5m"):
     try:
         print(f"🔍 Buscando dados para {symbol} com intervalo de {interval}...")
 
-        # Baixa os dados intraday do Yahoo Finance
-        data = yf.download(tickers=symbol, period="1d", interval=interval)
+        # Validação de intervalos suportados
+        valid_intervals = ["1m", "2m", "5m", "15m", "30m", "1h", "1d"]
+        if interval not in valid_intervals:
+            print(f"⚠️ Intervalo {interval} não suportado! Use um dos seguintes: {valid_intervals}")
+            return None
+
+        # Ajuste do período para ativos diferentes
+        period = "1d" if interval in ["1m", "2m", "5m", "15m", "30m"] else "7d"
+
+        # Baixa os dados do Yahoo Finance
+        data = yf.download(tickers=symbol, period=period, interval=interval)
 
         if data.empty:
-            print("⚠️ Nenhum dado encontrado. Verifique o símbolo ou o intervalo.")
+            print(f"⚠️ Nenhum dado encontrado para {symbol} com intervalo {interval}.")
             return None
 
         # Renomeia as colunas para manter o padrão
@@ -35,25 +44,32 @@ def fetch_market_data(symbol="AAPL", interval="5m"):
             "Volume": "volume"
         }, inplace=True)
 
-        # Verifica se os horários já possuem timezone
+        # Ajusta os horários do DataFrame para UTC-3
         if data.index.tz is None:
             data.index = data.index.tz_localize("UTC")  # Adiciona timezone UTC
         data.index = data.index.tz_convert("America/Sao_Paulo")  # Converte para UTC-3
 
-        print(f"🕒 Dados ajustados para o horário local (UTC-3):\n{data.head()}")
-
-        # Remove timezone para exibição mais limpa (opcional)
+        # Força todos os horários no DataFrame para serem tz-naive (sem timezone)
         data.index = data.index.tz_localize(None)
+
+        print(f"🕒 Dados ajustados para o horário local (UTC-3):\n{data.head()}")
 
         # Ordena os dados em ordem cronológica
         data = data.sort_index()
 
+        # Captura o horário atual no fuso correto e remove a timezone (tz-naive)
+        local_tz = pytz.timezone("America/Sao_Paulo")
+        current_time = datetime.now(local_tz).replace(tzinfo=None)
+
         # Verifica se o horário do último dado é recente
         last_data_time = data.index[-1]  # Horário do último dado
-        current_time = datetime.now()  # Horário atual do sistema
+        time_difference = current_time - last_data_time
+        print(f"🔎 Horário atual do sistema (ajustado): {current_time}")
+        print(f"🔎 Último dado recebido: {last_data_time}")
+        print(f"🔎 Diferença de tempo: {time_difference}")
 
-        # Define um limite de 30 minutos para os dados estarem atualizados
-        if current_time - last_data_time > timedelta(minutes=30):  # Alterado de 15 para 30 minutos
+        # Define um limite de tolerância de 30 minutos
+        if time_difference > timedelta(minutes=30):
             print(f"⚠️ Os dados estão desatualizados! Último dado: {last_data_time}")
             return None  # Retorna None se os dados estiverem desatualizados
         else:
