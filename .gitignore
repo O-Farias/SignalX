@@ -1,0 +1,21 @@
+# Ambiente Virtual
+venv/
+
+# Configurações Sensíveis
+.env
+
+# Cache e Arquivos Temporários do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Configurações do Editor/IDE
+.vscode/
+.idea/
+
+# Logs
+*.log
+
+# Arquivos do Sistema
+.DS_Store
+Thumbs.db
